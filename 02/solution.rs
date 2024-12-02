@@ -22,7 +22,7 @@ fn main() {
 
     let mut total = 0;
     
-    'outer: for line in reader.lines() {
+    for line in reader.lines() {
         let mut row: Vec<i32> = Vec::new();
         if let Ok(line) = line {
             // parse the line, split by 4 spaces
@@ -35,18 +35,24 @@ fn main() {
                 continue;
             }
 
-            if row[1] < row[0] {
-                // reverse the row
-                row.reverse();
-            }
+            
 
-            for i in 0..row.len()-1 {
-                if row[i+1] - row[i] < MIN_DIFF || row[i+1] - row[i] > MAX_DIFF {
-                    continue 'outer;
+            'outer: for j in 0..row.len() {
+                // remove the jth element
+                let mut new_row = row.clone();
+                new_row.remove(j);
+                if new_row[1] < new_row[0] {
+                    // reverse the row
+                    new_row.reverse();
                 }
+                for i in 0..new_row.len()-1 {
+                    if new_row[i+1] - new_row[i] < MIN_DIFF || new_row[i+1] - new_row[i] > MAX_DIFF {
+                        continue 'outer;
+                    }
+                }
+                total += 1;
+                break;
             }
-
-            total += 1;
 
 
         }
