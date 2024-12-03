@@ -63,7 +63,7 @@ fn part_two(lines: &Vec<String>) {
 
 
             if in_multiplication != "" {
-                    in_multiplication.push(curr_char);
+                in_multiplication.push(curr_char);
                 
 
                 if curr_char == ')' {
@@ -123,11 +123,51 @@ fn part_two(lines: &Vec<String>) {
     println!("total (part 2): {}", sum);
 }
 
+
+fn part_two_better(lines: &Vec<String>, enabled_disabled: bool) {
+    let regex = Regex::new("mul\\(([1-9]{1}[0-9]{0,2}),([1-9]{1}[0-9]{0,2})\\)|don't\\(\\)|do\\(\\)").unwrap();
+
+    let mut enabled = true;
+    let mut sum = 0;
+
+    for line in lines {
+        let matches = regex.find_iter(line);
+
+        for curr_match in matches {
+
+            if curr_match.as_str() == "don't()" {
+                enabled = false;
+                continue;
+            }
+            if curr_match.as_str() == "do()" {
+                enabled = true;
+                continue;
+            }
+
+            // get group 1 and group 2
+            let captures = regex.captures(curr_match.as_str()).unwrap();
+            let first = captures[1].parse::<i32>().unwrap();
+            let second = captures[2].parse::<i32>().unwrap();
+            if enabled_disabled || enabled {
+                sum += first * second;
+            }
+        }
+
+    }
+
+    if enabled_disabled {
+        println!("total (part 1): {}", sum);
+    } else {
+        println!("total (part 2): {}", sum);
+    }
+
+}
+
 fn main() {
     let lines = read_lines();
 
-    part_one(&lines);
-    part_two(&lines);
+    part_two_better(&lines, true);
+    part_two_better(&lines, false);
 
     
 }
