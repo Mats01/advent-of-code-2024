@@ -31,6 +31,22 @@ fn read_lines() -> (Vec<String>, Vec<String>) {
     (lines_top, lines_bottom)
 }
 
+fn custom_sort(line: &Vec<i32>, cant_be_after: &HashMap<i32, Vec<i32>>) -> Vec<i32> {
+    let mut fixed_line = line.clone();
+    fixed_line.sort_by(|a, b| {
+        if cant_be_after.contains_key(&a) {
+            if cant_be_after[&a].contains(&b) {
+                std::cmp::Ordering::Less
+            } else {
+                std::cmp::Ordering::Equal
+            }
+        } else {
+            std::cmp::Ordering::Equal
+        }
+    });
+    fixed_line
+}
+
 fn main() {
     let (lines_top, lines_bottom) = read_lines();
 
@@ -43,54 +59,27 @@ fn main() {
 
 
     let mut good_lines: Vec<Vec<i32>> = Vec::new();
-    let mut bad_lines: Vec<Vec<i32>> = Vec::new();
-    'outer: for line in lines_bottom {
+    let mut fixed_lines: Vec<Vec<i32>> = Vec::new();
+    for line in lines_bottom {
         let numbers = line.split(",").map(|s| s.parse().unwrap()).collect::<Vec<i32>>();
-        for (i, number) in numbers.iter().enumerate() {
-            if cant_be_after.contains_key(&number) {
-                let values = cant_be_after[&number].clone();
-                let all_before_me = numbers.iter().take(i).collect::<Vec<_>>();
-                for value in values {
-                    if all_before_me.contains(&&value) {
-                        bad_lines.push(numbers);
-                        continue 'outer;
-                    }
-                }
-            }
+        let sorted_line = custom_sort(&numbers, &cant_be_after);
+        if sorted_line == numbers {
+            good_lines.push(numbers);
+        } else {
+            fixed_lines.push(sorted_line);
         }
-        good_lines.push(numbers);
     }
     
     let mut sum_of_middles = 0;
     for line in good_lines {
         sum_of_middles += line[line.len() / 2];
     }
-    println!("{}", sum_of_middles);
+    println!("part 1: {}", sum_of_middles);
 
-    // fix bad lines
-    let mut fixed_lines: Vec<Vec<i32>> = Vec::new();
-    for numbers in bad_lines {
-        let mut fixed_line = numbers.clone();
-        fixed_line.sort_by(|a, b| {
-            if cant_be_after.contains_key(&a) {
-                if cant_be_after[&a].contains(&b) {
-                    std::cmp::Ordering::Less
-                } else {
-                    std::cmp::Ordering::Equal
-                }
-            } else {
-                std::cmp::Ordering::Equal
-            }
-        });
-
-        fixed_lines.push(fixed_line);
-    }
-
-    println!("{:?}", fixed_lines);
     sum_of_middles = 0;
     for line in fixed_lines {
         sum_of_middles += line[line.len() / 2];
     }
-    println!("{}", sum_of_middles);
+    println!("part 2: {}", sum_of_middles);
 
 }
