@@ -96,9 +96,11 @@ fn main() {
         let target: i64 = target.parse().unwrap();
         let numbers: Vec<i64> = numbers.split(" ").map(|n| n.parse().unwrap()).collect();
          // make an array of all comibantions of 0, 1, 2 of length numbers.len() - 1
-        let combinations;
+        let mut combinations;
          if !permutations_cache.contains_key(&(numbers.len() - 1)) {
             combinations = permutation_generator(numbers.len() - 1, vec!['0', '1', '2']);
+            // sort the outer array so 0,0,0 is first and 2,2,2 is last
+            combinations.sort_by_key(|arr| arr.iter().map(|&c| c.to_digit(10).unwrap()).sum::<u32>());
             permutations_cache.insert(numbers.len() - 1, combinations.clone());
          } else {
             combinations = permutations_cache[&(numbers.len() - 1)].clone();
