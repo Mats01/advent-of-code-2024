@@ -1,6 +1,7 @@
 use std::env;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
+use std::collections::HashMap;
 
 fn read_lines() -> Vec<String> {
     let args: Vec<String> = env::args().collect();
@@ -88,12 +89,20 @@ fn main() {
 
     let mut sum2 = 0;
 
+    let mut permutations_cache: HashMap<usize, Vec<Vec<char>>> = HashMap::new();
+
     for line in &lines {
         let (target, numbers) = line.split_once(": ").unwrap();
         let target: i64 = target.parse().unwrap();
         let numbers: Vec<i64> = numbers.split(" ").map(|n| n.parse().unwrap()).collect();
          // make an array of all comibantions of 0, 1, 2 of length numbers.len() - 1
-         let combinations = permutation_generator(numbers.len() - 1, vec!['0', '1', '2']);
+        let combinations;
+         if !permutations_cache.contains_key(&(numbers.len() - 1)) {
+            combinations = permutation_generator(numbers.len() - 1, vec!['0', '1', '2']);
+            permutations_cache.insert(numbers.len() - 1, combinations.clone());
+         } else {
+            combinations = permutations_cache[&(numbers.len() - 1)].clone();
+         }
          
 
          for ternary_digits in combinations {
