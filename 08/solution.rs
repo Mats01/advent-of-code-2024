@@ -47,6 +47,18 @@ impl std::fmt::Display for Point {
     }
 }
 
+
+fn normalized_step(distance_x: i32, distance_y: i32) -> (i32, i32) {
+    let smaller = distance_x.abs().min(distance_y.abs());
+    let larger = distance_x.abs().max(distance_y.abs());
+    if (larger % smaller) == 0 {
+        return (distance_x / smaller, distance_y / smaller);
+    }
+    (distance_x, distance_y)
+}
+
+
+
 fn look_for_sibling(field: &mut Vec<Vec<Point>>, position: (usize, usize)) {
     let start_antenna = field[position.0][position.1].antenna;
     // dont worry about i32 because im only going into positive directions!!!!
@@ -76,21 +88,37 @@ fn look_for_sibling(field: &mut Vec<Vec<Point>>, position: (usize, usize)) {
 
             // print distance
             if field[new_position.0][new_position.1].antenna == start_antenna {
-                
-                
-                // Calculate antinode positions, checking for negative values
-                let antinode_above = (position.0 as i32 - distance_x, position.1 as i32 - distance_y);
+               
+                let mut n_step = normalized_step(distance_x, distance_y);
 
-                // check if its in bounds
-                if antinode_above.0 < cols as i32 && antinode_above.1 < rows as i32 && antinode_above.0 >= 0 && antinode_above.1 >= 0 {
-                    field[antinode_above.0 as usize][antinode_above.1 as usize].has_antinode = true;
+                let start_n_step = n_step.clone();
+                loop {
+                    let antinode = (position.0 as i32 + n_step.0, position.1 as i32 + n_step.1);
+                    if antinode.0 >= cols as i32 || antinode.1 >= rows as i32 || antinode.0 < 0 || antinode.1 < 0{
+                        break;
+                    }
+
+                    field[antinode.0 as usize][antinode.1 as usize].has_antinode = true;
+                    n_step = (n_step.0 + start_n_step.0, n_step.1 + start_n_step.1);
                 }
 
+                n_step = (-start_n_step.0, -start_n_step.1);
+                loop {
 
-                let antinode_below = (new_position.0 as i32 + distance_x, new_position.1 as i32 + distance_y);
-                if antinode_below.0 < cols as i32 && antinode_below.1 < rows as i32 && antinode_below.0 >= 0 && antinode_below.1 >= 0 {
-                    field[antinode_below.0 as usize][antinode_below.1 as usize].has_antinode = true;
+                    let antinode = (position.0 as i32 + n_step.0, position.1 as i32 + n_step.1);
+                    if antinode.0 >= cols as i32 || antinode.1 >= rows as i32 || antinode.0 < 0 || antinode.1 < 0{
+                        break;
+                    }
+
+                    field[antinode.0 as usize][antinode.1 as usize].has_antinode = true;
+                    n_step = (n_step.0 - start_n_step.0, n_step.1 - start_n_step.1);
+
+
                 }
+
+                
+                
+            
         
             }
             
@@ -140,7 +168,7 @@ fn main() {
     for row in &field {
         for point in row {
             print!("{}", point);
-            if point.has_antinode {
+            if point.has_antinode || point.antenna.is_some() {
                 antinode_count += 1;
             }
         }
