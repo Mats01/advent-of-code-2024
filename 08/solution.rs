@@ -73,21 +73,11 @@ fn look_for_sibling(field: &mut Vec<Vec<Point>>, position: (usize, usize)) {
             }
             let new_position = (i,j);
 
-            
-            // curr distance
-            let distance_x: i32 = new_position.0 as i32 - position.0 as i32;
-            // if more than half the field break
-            if distance_x > (cols / 2) as i32 {
-                continue;
-            }
-
-            let distance_y: i32 = new_position.1 as i32 - position.1 as i32;
-            if distance_y > (rows / 2) as i32 {
-                continue;
-            }
 
             // print distance
             if field[new_position.0][new_position.1].antenna == start_antenna {
+                let distance_x: i32 = new_position.0 as i32 - position.0 as i32;
+                let distance_y: i32 = new_position.1 as i32 - position.1 as i32;
                
                 let mut n_step = normalized_step(distance_x, distance_y);
 
